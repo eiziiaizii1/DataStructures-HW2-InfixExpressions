@@ -1,0 +1,10 @@
+Challenges:
+1- Reading number which has more than 1 digit
+2- operator-operand arasında boşluk
+3- operator stack elemanı eklemeyle alaklı sorun
+4- expression başında '-'
+5- 7&5 = 5.0 ve *10 = 10.0 gibi caselerde not valid demesi lazım
+6- ERROR yerine null yazıyor
+7- 1 2 3 gibi expressionları  123 yapıyor
+8- filenot found'ı catcle
+

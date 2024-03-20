@@ -39,7 +39,7 @@ public class OperationHandler {
 
             for (int i = 0; i < lineLength && isExpValid; i++) {
                 //-------
-                if(line.charAt(i) == ' '){
+                if(line.charAt(i) == ' ' || (i == 0 && line.charAt(i) == '-')){
                     continue;
                 }
                 //---------
@@ -48,13 +48,13 @@ public class OperationHandler {
                     while (numIndex < lineLength && Character.isDigit(line.charAt(numIndex)))
                         numIndex++;
 
-                    if (operandStack.getSize() == 0 && line.charAt(0) == '-')
+                    if (line.charAt(0) == '-' && operandStack.getSize() == 0 )
                         operandStack.push(Float.parseFloat(("-"+line.substring(i, numIndex))));
                     else
                         operandStack.push(Float.parseFloat(line.substring(i, numIndex)));
 
                     i = numIndex - 1;
-                } else if (i != 0 && (isExpValid = isValidOperator(line.charAt(i)))) {
+                } else if (i != 0 && i != lineLength-1 && (isExpValid = isValidOperator(line.charAt(i))) ) {
                     // repeat until currentSymbol becomes less than the popped one (Instead of popping and pushing I used top, then popped if necessary)
                     char currentOperator = line.charAt(i);
                     if (checkPrecedence(currentOperator, operatorStack.top())) {
@@ -79,6 +79,9 @@ public class OperationHandler {
                 }
             }
 
+            if(operatorStack.getSize()+1 != operandStack.getSize()){
+                isExpValid = false;
+            }
 
             while (isExpValid) {
                 if (operatorStack.top() == '@')

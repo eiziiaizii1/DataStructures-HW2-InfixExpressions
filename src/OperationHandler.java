@@ -79,7 +79,7 @@ public class OperationHandler {
                 }
             }
 
-            if(operatorStack.getSize()+1 != operandStack.getSize()){
+            if(operatorStack.getSize() != operandStack.getSize()){
                 isExpValid = false;
             }
 

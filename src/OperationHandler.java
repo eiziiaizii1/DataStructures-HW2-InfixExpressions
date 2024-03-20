@@ -5,12 +5,13 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class OperationHandler {
-    private OperationHandler() {
-    }
-
     OperationHandler(String pathName) {
         File inputFile = new File(pathName);
-        processFile(inputFile);
+        try {
+            processFile(inputFile);
+        } catch (Exception e) {
+            System.out.println("File not found");
+        }
     }
 
     private void processFile(File inputFile) {
@@ -24,65 +25,76 @@ public class OperationHandler {
         StackSLL<Float> operandStack;
 
         while (sc.hasNextLine()) {
-            String line = sc.nextLine().trim();//.replace(" ", "")
+            String line = sc.nextLine().trim();
 
             operatorStack = new StackSLL<>();
             operandStack = new StackSLL<>();
-            operatorStack.push('@');  //'@' is my dummy operator
+            operatorStack.push('@');  //'@' dummy operator
 
-            boolean isExpValid = true;
             int lineLength = line.length();
-            if(line.isBlank()){
+            if (line.isBlank()) {
                 continue;
             }
-            System.out.print(line + " = ");
-
+            boolean isExpValid = true;
+            String errorExplanation = ""; // Holds the relevant error message
             for (int i = 0; i < lineLength && isExpValid; i++) {
-                //-------
-                if(line.charAt(i) == ' ' || (i == 0 && line.charAt(i) == '-')){
+                // Skips the spaces and first '-' character at the beginning
+                if (line.charAt(i) == ' ' || (i == 0 && line.charAt(i) == '-')) {
                     continue;
                 }
-                //---------
-                else if (Character.isDigit(line.charAt(i))) {
+                // Checks the characters, if it is numeric value adds it to operandStack
+                if (Character.isDigit(line.charAt(i))) {
                     int numIndex = i + 1;
                     while (numIndex < lineLength && Character.isDigit(line.charAt(numIndex)))
                         numIndex++;
 
-                    if (line.charAt(0) == '-' && operandStack.getSize() == 0 )
-                        operandStack.push(Float.parseFloat(("-"+line.substring(i, numIndex))));
+                    // Checks whether the first operand of the expression is negative, based on that adds to the stack
+                    if (line.charAt(0) == '-' && operandStack.getSize() == 0)
+                        operandStack.push(Float.parseFloat(("-" + line.substring(i, numIndex))));
                     else
                         operandStack.push(Float.parseFloat(line.substring(i, numIndex)));
-
                     i = numIndex - 1;
-                } else if (i != 0 && i != lineLength-1 && (isExpValid = isValidOperator(line.charAt(i))) ) {
-                    // repeat until currentSymbol becomes less than the popped one (Instead of popping and pushing I used top, then popped if necessary)
+                }
+                // Checks symbol, determines what do next
+                else if (isValidOperator(line.charAt(i))) {
+                    if (i == 0 || i == lineLength - 1) {
+                        errorExplanation = "There can't be an operator at the end or at the beginning of the expression, except for '-' at the beginning!!!";
+                        isExpValid = false;
+                        break;
+                    }
+                    // Repeat until currentSymbol becomes less than the popped one (Instead of popping and pushing I used top, then popped if necessary)
                     char currentOperator = line.charAt(i);
                     if (checkPrecedence(currentOperator, operatorStack.top())) {
-                        // push the current operator
+                        // Push the current operator
                         operatorStack.push(currentOperator);
                     } else {
-                        // pop 2 operands, perform operation, push result to operand stack, repeat until symbol becomes less than the popped one
+                        // Pop 2 operands, perform operation, push result to operand stack, repeat until symbol becomes less than the popped one
                         do {
                             try {
                                 float operationResult = performOperation(operandStack.pop(), operatorStack.pop(), operandStack.pop());
                                 operandStack.push(operationResult);
                             } catch (NullPointerException npe) {
+                                errorExplanation = "Consecutive operators are invalid!!!";
                                 isExpValid = false;
                                 break;
                             }
                         } while (!checkPrecedence(currentOperator, operatorStack.top()));
                         operatorStack.push(currentOperator);
                     }
-                }
-                else{
+                } else {
+                    errorExplanation = "Undefined character";
                     isExpValid = false;
+                    break;
                 }
             }
 
-            if(operatorStack.getSize() != operandStack.getSize()){
+            // (# of operands) - (# of operators) must be equal to 1
+            if (operatorStack.getSize() != operandStack.getSize() && isExpValid) {
+                errorExplanation = "(# of operands) and (# of operators) does not match ";
                 isExpValid = false;
             }
 
+            // Performs the operations remained in the stack
             while (isExpValid) {
                 if (operatorStack.top() == '@')
                     break;
@@ -94,7 +106,8 @@ public class OperationHandler {
                 }
             }
 
-            System.out.println(isExpValid ? operandStack.pop() : "ERROR");
+            System.out.print(line + " = ");
+            System.out.println(isExpValid ? operandStack.pop() : errorExplanation);
         }
     }
 
@@ -126,5 +139,4 @@ public class OperationHandler {
             default -> throw new IllegalArgumentException("Operator " + operator + " is undefined");
         };
     }
-
 }

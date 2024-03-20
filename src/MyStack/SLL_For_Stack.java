@@ -13,11 +13,9 @@ class SLL_For_Stack<T> {
         public T getData(){
             return this.data;
         }
-
         public Node<T> getNext(){
             return this.next;
         }
-
         public void setNext(Node<T> n){
             this.next = n;
         }
@@ -55,11 +53,9 @@ class SLL_For_Stack<T> {
     public T getFirst(){
         return  head.getData();
     }
-
     boolean isEmpty(){
         return size == 0;
     }
-
     public int getSize(){
         return size;
     }

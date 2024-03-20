@@ -5,6 +5,5 @@ public interface Stack<T> {
     public T pop();
     public T top();
     public boolean isEmpty();
-
     public int getSize();
 }

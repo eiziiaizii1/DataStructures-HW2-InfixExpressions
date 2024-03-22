@@ -1,3 +1,4 @@
+// Aziz Önder - 22050141021
 package MyStack;
 
 // This Singly Linked List contains only required methods for Stack

@@ -1,3 +1,4 @@
+// Aziz Önder - 22050141021
 package MyStack;
 
 public class StackSLL<T> implements Stack<T>{

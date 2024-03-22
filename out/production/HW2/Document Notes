@@ -7,4 +7,5 @@ Challenges:
 6- ERROR yerine null yazıyor
 7- 1 2 3 gibi expressionları  123 yapıyor
 8- filenot found'ı catcle
-9-10 10 10 vb. hatalı sonuç(10)
+9- 10 10 10 vb. hatalı sonuç(10)
+10- meaningfull error messages

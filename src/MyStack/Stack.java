@@ -1,3 +1,4 @@
+// Aziz Önder - 22050141021
 package MyStack;
 
 public interface Stack<T> {

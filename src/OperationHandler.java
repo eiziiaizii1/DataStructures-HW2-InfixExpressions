@@ -1,3 +1,6 @@
+// Aziz Önder - 22050141021
+
+import MyStack.Stack;
 import MyStack.StackSLL;
 
 import java.io.File;
@@ -9,20 +12,22 @@ public class OperationHandler {
         File inputFile = new File(pathName);
         try {
             processFile(inputFile);
-        } catch (Exception e) {
-            System.out.println("File not found");
+        } catch (FileNotFoundException fnfe) {
+            System.out.println("File is not found --> " + fnfe);
+        }catch (RuntimeException re){
+            System.out.println("An error occurred in Runtime --> " + re);
         }
     }
 
-    private void processFile(File inputFile) {
+    private void processFile(File inputFile) throws FileNotFoundException{
         Scanner sc;
         try {
             sc = new Scanner(inputFile);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new FileNotFoundException();
         }
-        StackSLL<Character> operatorStack;
-        StackSLL<Float> operandStack;
+        Stack<Character> operatorStack;
+        Stack<Float> operandStack;
 
         while (sc.hasNextLine()) {
             String line = sc.nextLine().trim();
@@ -44,37 +49,28 @@ public class OperationHandler {
                 }
                 // Checks the characters, if it is numeric value adds it to operandStack
                 if (Character.isDigit(line.charAt(i))) {
-                    int numIndex = i + 1;
-                    while (numIndex < lineLength && Character.isDigit(line.charAt(numIndex)))
-                        numIndex++;
-
-                    // Checks whether the first operand of the expression is negative, based on that adds to the stack
-                    if (line.charAt(0) == '-' && operandStack.getSize() == 0)
-                        operandStack.push(Float.parseFloat(("-" + line.substring(i, numIndex))));
-                    else
-                        operandStack.push(Float.parseFloat(line.substring(i, numIndex)));
-                    i = numIndex - 1;
+                    i = handleNumericCharacters(i,lineLength,line,operandStack);
                 }
                 // Checks symbol, determines what do next
                 else if (isValidOperator(line.charAt(i))) {
                     if (i == 0 || i == lineLength - 1) {
-                        errorExplanation = "There can't be an operator at the end or at the beginning of the expression, except for '-' at the beginning!!!";
+                        errorExplanation = "ERROR: There can't be an operator at the end or at the beginning of the expression, except for '-' at the beginning!!!";
                         isExpValid = false;
                         break;
                     }
-                    // Repeat until currentSymbol becomes less than the popped one (Instead of popping and pushing I used top, then popped if necessary)
+                    // Repeats until currentSymbol becomes less than the popped one (Instead of popping and pushing I used top, then popped if necessary)
                     char currentOperator = line.charAt(i);
                     if (checkPrecedence(currentOperator, operatorStack.top())) {
-                        // Push the current operator
+                        // Pushes the current operator
                         operatorStack.push(currentOperator);
                     } else {
-                        // Pop 2 operands, perform operation, push result to operand stack, repeat until symbol becomes less than the popped one
+                        // Pops 2 operands, perform operation, push result to operand stack, repeat until symbol becomes less than the popped one
                         do {
                             try {
                                 float operationResult = performOperation(operandStack.pop(), operatorStack.pop(), operandStack.pop());
                                 operandStack.push(operationResult);
                             } catch (NullPointerException npe) {
-                                errorExplanation = "Consecutive operators are invalid!!!";
+                                errorExplanation = "ERROR: Consecutive operators are invalid!!!";
                                 isExpValid = false;
                                 break;
                             }
@@ -82,7 +78,7 @@ public class OperationHandler {
                         operatorStack.push(currentOperator);
                     }
                 } else {
-                    errorExplanation = "Undefined character";
+                    errorExplanation = "ERROR: Undefined character";
                     isExpValid = false;
                     break;
                 }
@@ -90,7 +86,7 @@ public class OperationHandler {
 
             // (# of operands) - (# of operators) must be equal to 1
             if (operatorStack.getSize() != operandStack.getSize() && isExpValid) {
-                errorExplanation = "(# of operands) and (# of operators) does not match ";
+                errorExplanation = "ERROR: (# of operands) and (# of operators) does not match ";
                 isExpValid = false;
             }
 
@@ -109,6 +105,20 @@ public class OperationHandler {
             System.out.print(line + " = ");
             System.out.println(isExpValid ? operandStack.pop() : errorExplanation);
         }
+    }
+
+    private int handleNumericCharacters (int i, int lineLength, String line, Stack<Float> operandStack){
+        int numIndex = i + 1;
+        while (numIndex < lineLength && Character.isDigit(line.charAt(numIndex)))
+            numIndex++;
+
+        // Checks whether the first encountered number in the expression is negative, based on that adds negative value  to the stack
+        if (line.charAt(0) == '-' && operandStack.getSize() == 0)
+            operandStack.push(-Float.parseFloat((line.substring(i, numIndex))));
+        else
+            operandStack.push(Float.parseFloat(line.substring(i, numIndex)));
+
+        return numIndex - 1;
     }
 
     private boolean isValidOperator(char symbol) {
